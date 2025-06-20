@@ -1,0 +1,25 @@
+name: Scrape NHK News
+
+on:
+  schedule:
+    - cron: '0 21 * * *'  # 毎日 朝6時（JST）に実行
+  workflow_dispatch:      # 手動実行も可能
+
+jobs:
+  run-scraper:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run scraper
+        run: node nhk_scraper.js
