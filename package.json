@@ -1,0 +1,11 @@
+{
+  "name": "nhk-news-scraper",
+  "version": "1.0.0",
+  "main": "nhk_scraper.js",
+  "scripts": {
+    "start": "node nhk_scraper.js"
+  },
+  "dependencies": {
+    "puppeteer": "^21.3.8"
+  }
+}

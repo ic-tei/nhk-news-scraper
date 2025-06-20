@@ -1,0 +1,8 @@
+services:
+  - type: cron
+    name: nhk-news-scraper
+    schedule: "30 5 * * *"  # 毎朝5:30 JST
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
