@@ -6,5 +6,4 @@ services:
     startCommand: "node nhk_scraper.js"
     plan: free
     region: oregon
-    runtime: node # ← これを追加
-    nodeVersion: 20.8.1 # ← 推奨バージョンを明示
+    # runtime や nodeVersion は不要・削除！
