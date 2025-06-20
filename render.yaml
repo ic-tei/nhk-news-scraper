@@ -1,8 +1,10 @@
 services:
-  - type: cron
+  - type: web
     name: nhk-news-scraper
-    schedule: "30 5 * * *"  # 毎朝5:30 JST
-    runtime: node
+    env: node
+    buildCommand: "npm install"
+    startCommand: "node nhk_scraper.js"
     plan: free
-    buildCommand: npm install
-    startCommand: npm start
+    region: oregon
+    runtime: node # ← これを追加
+    nodeVersion: 20.8.1 # ← 推奨バージョンを明示
