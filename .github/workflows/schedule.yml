@@ -1,0 +1,25 @@
+name: 定時ニュース取得＆Driveアップロード
+
+on:
+  schedule:
+    - cron: '30 6 * * *'  # JST 15:30 に実行する（UTC表記で朝6:30）
+
+jobs:
+  run-news:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: 実行
+        env:
+          SERVICE_ACCOUNT_KEY: ${{ secrets.SERVICE_ACCOUNT_KEY }}
+        run: |
+          echo "$SERVICE_ACCOUNT_KEY" > service_account.json
+          python zip_generator.py
+          python upload_to_drive_with_share.py
+          python send_email.py
