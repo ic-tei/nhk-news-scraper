@@ -3,7 +3,7 @@ name: 定時ニュース取得＆Driveアップロード
 on:
   workflow_dispatch:  # ← これを追加！（手動実行を有効にする）
   schedule:
-    - cron: '50 12 * * *'  # JST 21:50 に実行する（UTC表記で朝6:30）
+    - cron: '30 21 * * *'  # JST 6:30 に実行する（UTC表記で朝6:30）
 
 jobs:
   run-news:
