@@ -2,7 +2,7 @@ name: 定時ニュース取得＆Driveアップロード
 
 on:
   schedule:
-    - cron: '30 6 * * *'  # JST 15:30 に実行する（UTC表記で朝6:30）
+    - cron: '15 12 * * *'  # JST 21:15 に実行する（UTC表記で朝6:30）
 
 jobs:
   run-news:
