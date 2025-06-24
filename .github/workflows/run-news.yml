@@ -1,36 +1,30 @@
-name: 定期ニュース取得＆Driveアップロード
+name: 定時ニュース取得 & Driveアップロード
 
 on:
-  workflow_dispatch:
+  workflow_dispatch:  # 手動実行用
   schedule:
-    - cron: '55 0 * * *'  # 毎日9:55(JST)
+    - cron: '55 0 * * *'  # 日本時間9:55に毎日実行（UTCで0:55）
 
 jobs:
   run-news:
     runs-on: ubuntu-latest
 
     steps:
-      - name: レポジトリをクローン
+      - name: チェックアウト
         uses: actions/checkout@v3
 
-      - name: Python を設定
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-
-      - name: Node.js 設定
+      - name: Node.jsをセットアップ
         uses: actions/setup-node@v3
         with:
           node-version: '20'
 
-      - name: 依存関係をインストール
+      - name: 依存パッケージをインストール
         run: npm install
 
-      - name: ニュース取得スクリプト実行
+      - name: ニュース取得スクリプトを実行
         run: node nhk_scraper.js
         env:
-          GOOGLE_APPLICATION_CREDENTIALS: '${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}'
-          DRIVE_FOLDER_ID: '${{ secrets.DRIVE_FOLDER_ID }}'
-          MAIL_USER: '${{ secrets.MAIL_USER }}'
-          MAIL_PASS: '${{ secrets.MAIL_PASS }}'
-          MAIL_TO: '${{ secrets.MAIL_TO }}'
+          GOOGLE_CLIENT_EMAIL: ${{ secrets.GOOGLE_CLIENT_EMAIL }}
+          GOOGLE_PRIVATE_KEY: ${{ secrets.GOOGLE_PRIVATE_KEY }}
+          GOOGLE_FOLDER_ID: ${{ secrets.GOOGLE_FOLDER_ID }}
+          NOTIFY_EMAIL: ${{ secrets.NOTIFY_EMAIL }}
