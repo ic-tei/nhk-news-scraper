@@ -1,6 +1,4 @@
-requests
-beautifulsoup4
-lxml
-python-dotenv
-gspread
-oauth2client
+puppeteer
+googleapis
+nodemailer
+dotenv
