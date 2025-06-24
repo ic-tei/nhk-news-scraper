@@ -2,7 +2,7 @@ name: 定時ニュース取得＆Driveアップロード
 
 on:
   schedule:
-    - cron: '55 0 * * *'  # JST 9:55（日本時間）に実行（UTCで0:55）
+    - cron: '0 23 * * *'  # JST 8:00
   workflow_dispatch:
 
 jobs:
