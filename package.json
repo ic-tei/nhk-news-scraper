@@ -2,10 +2,16 @@
   "name": "nhk-news-scraper",
   "version": "1.0.0",
   "main": "nhk_scraper.js",
-  "scripts": {
-    "start": "node nhk_scraper.js"
-  },
+  "type": "module",
   "dependencies": {
-    "puppeteer": "^21.3.8"
+    "archiver": "^5.3.1",
+    "axios": "^1.6.0",
+    "cheerio": "^1.0.0-rc.12",
+    "dotenv": "^16.3.1",
+    "googleapis": "^105.0.0",
+    "jsdom": "^22.1.0",
+    "luxon": "^3.4.4",
+    "nodemailer": "^6.9.10",
+    "sanitize-filename": "^1.6.3"
   }
 }
