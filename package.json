@@ -12,6 +12,7 @@
     "jsdom": "^22.1.0",
     "luxon": "^3.4.4",
     "nodemailer": "^6.9.10",
-    "sanitize-filename": "^1.6.3"
+    "sanitize-filename": "^1.6.3",
+    "puppeteer": "^21.3.8" 
   }
 }
