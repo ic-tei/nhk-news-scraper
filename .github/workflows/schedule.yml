@@ -2,7 +2,7 @@ name: 定時ニュース取得＆Driveアップロード
 
 on:
   schedule:
-    - cron: '0 23 * * *'  # JST 8:00
+    - cron: '0 23 * * *'  # JST 8:00（日本時間8:00＝UTC23:00）
   workflow_dispatch:
 
 jobs:
@@ -22,4 +22,4 @@ jobs:
         run: npm install
 
       - name: Run script
-        run: node nhk_scraper.js
+        run: node nhk_scraper.cjs
