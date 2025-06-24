@@ -24,14 +24,13 @@ require('dotenv').config();
 
     const news = await page.evaluate(() => {
       return Array.from(document.querySelectorAll('a[href*="/news/html/"]')).slice(0, 5).map(a => {
-        const title = a.textContent.trim();
-        const href = a.getAttribute('href');
+        const title = a?.textContent?.trim();
+        const href = a?.getAttribute('href');
         return title && href ? { title, url: 'https://www3.nhk.or.jp' + href } : null;
       }).filter(n => n);
     });
 
-    const text = news.map(n => `■ ${n.title}
-${n.url}`).join("\n\n");
+    const text = news.map(n => `■ ${n.title}\n${n.url}`).join("\n\n");
     fs.writeFileSync('news.txt', text, 'utf8');
     console.log("📝 ニュース保存完了");
 
@@ -40,13 +39,21 @@ ${n.url}`).join("\n\n");
     archive.pipe(output);
     archive.file('news.txt', { name: 'news.txt' });
     await archive.finalize();
-
     console.log("✅ ZIP作成完了");
+
+    // 安全な読み取り（undefinedならエラー）
+    const clientEmail = process.env.GCP_CLIENT_EMAIL;
+    const privateKeyRaw = process.env.GCP_PRIVATE_KEY;
+    const privateKey = (privateKeyRaw || '').replace(/\\n/g, '\n');
+
+    if (!clientEmail || !privateKey) {
+      throw new Error("GCP_CLIENT_EMAIL または GCP_PRIVATE_KEY が設定されていません");
+    }
 
     const auth = new google.auth.GoogleAuth({
       credentials: {
-        client_email: process.env.GCP_CLIENT_EMAIL,
-        private_key: process.env.GCP_PRIVATE_KEY.replace(/\n/g, '\n'),
+        client_email: clientEmail,
+        private_key: privateKey
       },
       scopes: ['https://www.googleapis.com/auth/drive.file']
     });
@@ -78,13 +85,13 @@ ${n.url}`).join("\n\n");
       from: `"NHKニュース" <${process.env.MAIL_USER}>`,
       to: process.env.MAIL_TO,
       subject: "今日のNHKニュースをアップロードしました",
-      text: `Google Driveにnews_${dateStr}.zip をアップロードしました。`,
+      text: `Google Driveに news_${dateStr}.zip をアップロードしました。`,
     });
 
     console.log("📩 メール通知送信完了");
 
     await browser.close();
   } catch (err) {
-    console.error("❌ エラー発生:", err);
+    console.error("❌ エラー発生:", err.message || err);
   }
 })();
