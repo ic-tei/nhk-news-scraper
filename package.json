@@ -1,18 +1,16 @@
 {
   "name": "nhk-news-scraper",
   "version": "1.0.0",
-  "main": "nhk_scraper.js",
-  "type": "module",
+  "description": "NHKニュース取得スクリプト",
+  "main": "nhk_scraper.cjs",
+  "scripts": {
+    "start": "node nhk_scraper.cjs"
+  },
   "dependencies": {
     "archiver": "^5.3.1",
-    "axios": "^1.6.0",
-    "cheerio": "^1.0.0-rc.12",
-    "dotenv": "^16.3.1",
+    "dotenv": "^16.0.3",
     "googleapis": "^105.0.0",
-    "jsdom": "^22.1.0",
-    "luxon": "^3.4.4",
-    "nodemailer": "^6.9.10",
-    "sanitize-filename": "^1.6.3",
-    "puppeteer": "^21.3.8" 
+    "nodemailer": "^6.9.3",
+    "puppeteer": "^21.3.8"
   }
 }
