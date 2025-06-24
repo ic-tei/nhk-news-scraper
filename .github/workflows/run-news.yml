@@ -17,7 +17,7 @@ jobs:
           node-version: '18'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Run news scraper
-        run: node ./nhk_scraper.cjs
+        run: node nhk_scraper/nhk_scraper.js
