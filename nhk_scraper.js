@@ -12,7 +12,7 @@ require('dotenv').config();
     const browser = await puppeteer.launch({ args: ['--no-sandbox'], headless: true });
     const page = await browser.newPage();
 
-    // 日付取得（例：20250624）
+    // 日付取得
     const today = new Date();
     const yyyy = today.getFullYear();
     const mm = String(today.getMonth() + 1).padStart(2, '0');
@@ -47,7 +47,6 @@ require('dotenv').config();
 
     await browser.close();
 
-    // 要約とファイル生成
     const simpleText = articles.map((a, i) =>
       `■ ${i + 1}. ${a.title}\n${a.body.slice(0, 100)}...`
     ).join('\n\n');
@@ -61,13 +60,15 @@ require('dotenv').config();
     archive.file('news.txt', { name: 'news.txt' });
     await archive.finalize();
 
-    // Google Drive 認証・アップロード
-    const auth = new google.auth.GoogleAuth({
-      keyFile: 'credentials.json',
-      scopes: ['https://www.googleapis.com/auth/drive.file'],
-    });
+    // Google Drive 認証（GitHub Secrets経由）
+    const auth = new google.auth.JWT(
+      process.env.GCP_CLIENT_EMAIL,
+      null,
+      process.env.GCP_PRIVATE_KEY.replace(/\\n/g, '\n'),
+      ['https://www.googleapis.com/auth/drive.file']
+    );
 
-    const drive = google.drive({ version: 'v3', auth: await auth.getClient() });
+    const drive = google.drive({ version: 'v3', auth });
 
     const res = await drive.files.create({
       requestBody: {
