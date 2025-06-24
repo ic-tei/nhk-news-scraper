@@ -1,26 +1,25 @@
 name: 定時ニュース取得＆Driveアップロード
 
 on:
-  workflow_dispatch:  # ← これを追加！（手動実行を有効にする）
   schedule:
-    - cron: '30 21 * * *'  # JST 6:30 に実行する（UTC表記で朝6:30）
+    - cron: '5 21 * * *'  # 毎日21:05（日本時間）に実行（UTCで12:05）
+  workflow_dispatch:
 
 jobs:
   run-news:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
         with:
-          python-version: '3.10'
+          node-version: '18'
+
       - name: Install dependencies
-        run: pip install -r requirements.txt
-      - name: 実行
-        env:
-          SERVICE_ACCOUNT_KEY: ${{ secrets.SERVICE_ACCOUNT_KEY }}
-        run: |
-          echo "$SERVICE_ACCOUNT_KEY" > service_account.json
-          python zip_generator.py
-          python upload_to_drive_with_share.py
-          python send_email.py
+        run: npm install
+
+      - name: Run script
+        run: node nhk_scraper.js
