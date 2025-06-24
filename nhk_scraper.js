@@ -5,81 +5,104 @@ const { google } = require('googleapis');
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 
-console.log("🟡 ニュース取得スクリプト開始");
-
 (async () => {
   try {
-    // 日付取得
+    console.log("📥 ニュース取得スクリプト開始");
+
+    const browser = await puppeteer.launch({ args: ['--no-sandbox'], headless: true });
+    const page = await browser.newPage();
+
+    // 日付取得（例：20250624）
     const today = new Date();
     const yyyy = today.getFullYear();
     const mm = String(today.getMonth() + 1).padStart(2, '0');
     const dd = String(today.getDate()).padStart(2, '0');
     const dateStr = `${yyyy}${mm}${dd}`;
-
-    // PuppeteerでNHKページへ
-    const browser = await puppeteer.launch({ args: ['--no-sandbox'], headless: true });
-    const page = await browser.newPage();
     const url = `https://www3.nhk.or.jp/news/html/${dateStr}/`;
+
+    console.log("🌐 アクセス中: " + url);
     await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 0 });
 
-    const newsTitles = await page.$$eval('h3.title', els =>
-      els.map(el => el.innerText.trim()).filter(Boolean)
-    );
+    const links = await page.$$eval('a', as => as.map(a => a.href).filter(href => href.includes('/news/html/')));
+
+    let articles = [];
+
+    for (let link of links.slice(0, 5)) {
+      try {
+        const articlePage = await browser.newPage();
+        await articlePage.goto(link, { waitUntil: 'domcontentloaded', timeout: 0 });
+
+        const title = await articlePage.$eval('h1', el => el.innerText.trim());
+        const body = await articlePage.$$eval('p', ps => ps.map(p => p.innerText.trim()).join(' '));
+
+        if (title && body) {
+          articles.push({ title, body });
+        }
+
+        await articlePage.close();
+      } catch (e) {
+        console.log("⚠️ 記事スキップ: " + link);
+      }
+    }
 
     await browser.close();
 
-    // ファイル保存
-    const fileName = `news_${dateStr}.txt`;
-    const text = newsTitles.map((t, i) => `${i + 1}. ${t}`).join('\n');
-    fs.writeFileSync(fileName, text);
+    // 要約とファイル生成
+    const simpleText = articles.map((a, i) =>
+      `■ ${i + 1}. ${a.title}\n${a.body.slice(0, 100)}...`
+    ).join('\n\n');
 
-    // ZIP圧縮
-    const zipName = `news_${dateStr}.zip`;
-    const output = fs.createWriteStream(zipName);
-    const archive = archiver('zip', { zlib: { level: 9 } });
+    fs.writeFileSync('news.txt', simpleText, 'utf-8');
+
+    // ZIP生成
+    const output = fs.createWriteStream('news.zip');
+    const archive = archiver('zip');
     archive.pipe(output);
-    archive.file(fileName, { name: fileName });
+    archive.file('news.txt', { name: 'news.txt' });
     await archive.finalize();
 
-    // Google Drive 認証
+    // Google Drive 認証・アップロード
     const auth = new google.auth.GoogleAuth({
       keyFile: 'credentials.json',
       scopes: ['https://www.googleapis.com/auth/drive.file'],
     });
+
     const drive = google.drive({ version: 'v3', auth: await auth.getClient() });
 
-    // Driveにアップロード
-    const folderId = process.env.DRIVE_FOLDER_ID;
-    const fileMetadata = {
-      name: zipName,
-      parents: [folderId],
-    };
-    const media = {
-      mimeType: 'application/zip',
-      body: fs.createReadStream(zipName),
-    };
-    await drive.files.create({ resource: fileMetadata, media });
+    const res = await drive.files.create({
+      requestBody: {
+        name: `news_${dateStr}.zip`,
+        parents: [process.env.GDRIVE_FOLDER_ID],
+        mimeType: 'application/zip',
+      },
+      media: {
+        mimeType: 'application/zip',
+        body: fs.createReadStream('news.zip'),
+      },
+    });
 
-    // メール送信
+    console.log("✅ アップロード完了: " + res.data.id);
+
+    // メール通知
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_PASS,
+        user: process.env.EMAIL_FROM,
+        pass: process.env.EMAIL_PASS,
       },
     });
 
     await transporter.sendMail({
-      from: process.env.GMAIL_USER,
-      to: 'endoh-k@edu-g.gsn.ed.jp',
-      subject: `📢 ${dateStr}のニュースZIPをアップロードしました`,
-      text: `Google Driveへのアップロードが完了しました。ファイル名：${zipName}`,
+      from: `"KidsNews" <${process.env.EMAIL_FROM}>`,
+      to: process.env.EMAIL_TO,
+      subject: "ニュースZIPをアップロードしました",
+      text: `Google Drive に ${dateStr} の ZIP ファイルをアップしました。`,
     });
 
-    console.log("✅ 完了：ZIP作成・Driveアップロード・メール送信");
+    console.log("📨 メール通知完了");
 
   } catch (e) {
-    console.error("🔴 エラー発生:", e);
+    console.error("❌ エラー発生:", e);
     process.exit(1);
   }
 })();
