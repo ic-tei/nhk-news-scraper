@@ -2,7 +2,7 @@ name: Run News Scraper
 
 on:
   schedule:
-    - cron: '0 23 * * *'  # ✅ JST 8:00（= UTC 23:00）
+    - cron: '0 23 * * *'  # ✅ 毎朝8:00（日本時間）に相当（UTCで前日の23:00）
   workflow_dispatch:
 
 jobs:
@@ -13,7 +13,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
@@ -21,8 +21,9 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run NHK scraper
-        run: node nhk_scraper/nhk_scraper.js
+      - name: Run news scraper
+        run: node ./nhk_scraper/nhk_scraper.js
+
         env:
           GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
