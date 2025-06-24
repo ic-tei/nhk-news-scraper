@@ -1,42 +1,29 @@
 name: Run News Scraper
 
 on:
-  schedule:
-    - cron: '40 1 * * *'  # ✅ 日本時間10:40に実行（UTCで1:40）
   workflow_dispatch:
 
 jobs:
   run-news:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.11
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+    - name: Install dependencies
+      run: npm install
 
-      - name: Run news scraper
-        run: python news_scraper.py
-        env:
-          GOOGLE_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
-          MAIL_USER: ${{ secrets.MAIL_USER }}
-          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
-          MAIL_TO: ${{ secrets.MAIL_TO }}
+    - name: Run scraper
+      run: node nhk_scraper.js
 
-      - name: Upload ZIP to Drive
-        run: python upload_to_drive.py
-        env:
-          GOOGLE_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
+    - name: Upload ZIP to Drive
+      run: echo "ここにアップロード処理"
 
-      - name: Send notification email
-        run: python send_email.py
-        env:
-          MAIL_USER: ${{ secrets.MAIL_USER }}
-          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
-          MAIL_TO: ${{ secrets.MAIL_TO }}
+    - name: Send notification email
+      run: echo "ここに通知メール処理"
