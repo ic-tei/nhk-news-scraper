@@ -20,4 +20,4 @@ jobs:
         run: npm install
 
       - name: Run news scraper
-        run: node ./nhk_scraper.js
+        run: node ./nhk_scraper.cjs
