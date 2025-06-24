@@ -2,3 +2,4 @@ puppeteer
 googleapis
 nodemailer
 dotenv
+archiver
