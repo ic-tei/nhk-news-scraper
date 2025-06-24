@@ -21,9 +21,3 @@ jobs:
 
     - name: Run scraper
       run: node nhk_scraper.js
-
-    - name: Upload ZIP to Drive
-      run: echo "ここにアップロード処理"
-
-    - name: Send notification email
-      run: echo "ここに通知メール処理"
